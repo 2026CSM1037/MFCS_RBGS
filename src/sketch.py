@@ -204,18 +204,3 @@ def apply_sketch(sketch: Sketch | NDArray, X: NDArray) -> NDArray:
     if theta.shape[1] != X.shape[0]:
         raise ValueError("Theta column count must match X row count")
     return theta @ X
-
-
-if __name__ == "__main__":
-    # Small safe smoke tests; do not allocate paper-scale arrays here.
-    W = np.arange(64, dtype=np.float64).reshape(16, 4)
-    srht = Sketch("srht", k=8, n=16, seed=42)
-    rad = Sketch("rademacher", k=8, n=16, seed=42)
-    assert srht.apply(W).shape == (8, 4)
-    assert rad.apply(W).shape == (8, 4)
-    print("Sketch smoke tests passed.")
-    print("Paper hard sketch:", PAPER_DEFAULT_SKETCH_TYPE,
-          f"n={PAPER_HARD_N}, k={PAPER_HARD_SKETCH_K}")
-    print("Paper Krylov sketch sizes:", PAPER_KRYLOV_SKETCH_SIZES)
-    print("Paper Krylov precision settings are constants for the solver; "
-          "they are not applied by Sketch.apply().")
