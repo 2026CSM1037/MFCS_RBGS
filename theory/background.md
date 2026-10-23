@@ -3,13 +3,13 @@
 
 ## 1. Why Is Orthogonalization Needed?
 
-In numerical linear algebra, QR factorization represents a matrix \(W\) as
+In numerical linear algebra, QR factorization represents a matrix $W$ as
 
-\[
+$$
 W = QR,
-\]
+$$
 
-where the columns of \(Q\) are orthonormal and \(R\) is upper triangular.
+where the columns of $Q$ are orthonormal and $R$ is upper triangular.
 
 Orthonormal columns are important in numerical algorithms because they provide a stable basis for representing vectors and subspaces. QR factorization is used in applications such as solving linear systems and computing eigenvalues.
 
@@ -21,9 +21,9 @@ In exact arithmetic, this process produces orthogonal vectors when the input vec
 
 However, computers perform calculations using finite-precision floating-point arithmetic. Rounding errors can accumulate during projection and subtraction. Consequently, the computed basis may lose orthogonality, meaning that
 
-\[
+$$
 \widehat{Q}^{T}\widehat{Q} \neq I.
-\]
+$$
 
 The problem can become more severe when the input vectors are nearly linearly dependent. In such cases, small rounding errors may become significant relative to the remaining vector after projection.
 
@@ -45,7 +45,7 @@ Both methods are designed to construct useful orthogonal bases, but their numeri
 
 ## 4. The Main Idea of Randomized Block Gram–Schmidt (RBGS)
 
-Randomized Block Gram–Schmidt (RBGS) uses a random sketching matrix \(\Theta\) to create a lower-dimensional representation of the input vectors.
+Randomized Block Gram–Schmidt (RBGS) uses a random sketching matrix $\Theta$ to create a lower-dimensional representation of the input vectors.
 
 Instead of performing every operation directly on the original high-dimensional vectors, RBGS uses the sketch to estimate projection coefficients and carry out selected calculations in a smaller space.
 
