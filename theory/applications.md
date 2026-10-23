@@ -1,52 +1,77 @@
 # How RBGS Theory Connects to GMRES and Rayleigh–Ritz
 
-**Source:** Balabanov and Grigori, *Randomized Block Gram–Schmidt Process for the Solution of Linear Systems and Eigenvalue Problems*, Section 4, especially the randomized GMRES discussion (around paper p. 14) and the Rayleigh–Ritz discussion (around pp. 15–16 in the project brief's pagination).
+**Source:** Balabanov and Grigori, *Randomized Block Gram–Schmidt Process for the Solution of Linear Systems and Eigenvalue Problems*, Sec. 4.1–4.4 (pp. 14–16), with the supplementary analysis on pp. 30–33. Notation follows the paper: $AX=B$, $\Theta\in\mathbb{R}^{k\times n}$ is the sketching matrix, and $\hat Q$, $\hat H$ are the computed Arnoldi basis and Hessenberg matrix.
 
-## 1. Randomized GMRES: residual minimization and quasi-optimality
+## 1. Randomized GMRES is optimal up to a factor $\operatorname{cond}(\hat Q)$ (p. 14)
 
-GMRES solves a linear system by searching within a Krylov subspace. At each iteration, it chooses the candidate whose residual norm is smallest among the candidates in the current search space. Standard GMRES uses the Euclidean residual norm. The randomized version uses a sketching matrix \(\Theta\) and minimizes the sketched residual norm instead:
+**Setup.** RBGS-Arnoldi (Algorithm 4.1) builds a Krylov basis that is orthonormal in the sketched inner product. Under the stability conditions of RBGS, the computed quantities satisfy the Arnoldi identity (4.1),
 
-\[
-\min_y \|\Theta(b-Ax_0-\mathcal{K}y)\|_2,
-\]
+$$
+(A+\Delta A)\,\hat Q_{(1:p-1)}=\hat Q_{(1:p)}\,\hat H,
+$$
 
-where \(\mathcal{K}\) represents the relevant Krylov-space action/basis in the paper's notation.
+where $\lVert\Delta A\rVert$ is close to machine precision and $\operatorname{cond}(\hat Q)=O(1)$. GMRES then computes the $i$-th column of the solution as
 
-The benefit is that the residual comparison can be carried out in a lower-dimensional space. If \(\Theta\) is an \(\varepsilon\)-embedding for the relevant residual/search subspace, the sketched norm approximates the original norm. Thus a minimizer of the sketched problem cannot be arbitrarily worse than the best candidate in the original norm.
+$$
+u_i=\hat Q_{(1:p-1)}\arg\min_{z}\big\lVert\hat H z-\hat R_{(1:p,1)}e_i\big\rVert \tag{4.2}
+$$
 
-The paper's argument gives a quasi-optimality result for stable randomized GMRES, with a multiplicative factor involving \(\operatorname{cond}(Q)\), where \(Q\) is the computed basis. Intuitively, two ingredients are needed:
-1. the embedding makes sketched and original residual norms comparable on the relevant subspace;
-2. the computed basis must be sufficiently well-conditioned for the representation in basis coordinates not to amplify errors excessively.
+so the least-squares problem is solved in the small coordinates $z$. The question is how good $u_i$ is in terms of the actual residual $\lVert Av-b_i\rVert$, since $\hat Q$ is only $\Theta$-orthonormal and not $\ell_2$-orthonormal.
 
-**What this does not mean:** randomized GMRES is not guaranteed to match standard GMRES exactly, nor is the result unconditional. The embedding property and stability/conditioning requirements matter.
+**The argument.** The first block of the QR factorization of $[B,\ AQ]$ gives $b_i=\hat Q_{(1:p)}\hat R_{(1:p,1)}e_i$ (ignoring the small rounding term in $\hat W=\hat Q\hat R$). Together with (4.1), for every coefficient vector $z$,
 
-## 2. Rayleigh–Ritz: a sketched Galerkin condition
+$$
+(A+\Delta A)\hat Q_{(1:p-1)}z-b_i=\hat Q_{(1:p)}\big(\hat Hz-\hat R_{(1:p,1)}e_i\big).
+$$
 
-Rayleigh–Ritz approximates eigenpairs of a large matrix by restricting the eigenvalue problem to a smaller trial subspace. If \(Q\) spans the trial subspace, the classical Galerkin condition requires the eigen-residual to be orthogonal to that subspace:
+A residual that has been multiplied by $\hat Q$ can be compared to the coordinate residual from above and below:
 
-\[
-Q^T(AQy-\lambda Qy)=0.
-\]
+$$
+\sigma_{\min}(\hat Q)\,\lVert\hat Hz-\hat R_{(1:p,1)}e_i\rVert\;\le\;\lVert(A+\Delta A)\hat Q_{(1:p-1)}z-b_i\rVert\;\le\;\lVert\hat Q\rVert\,\lVert\hat Hz-\hat R_{(1:p,1)}e_i\rVert .
+$$
 
-The randomized method replaces this full-space orthogonality condition by its sketched counterpart:
+Now let $z_i$ be the minimizer in (4.2) and let $z$ be arbitrary. Using the upper bound at $z_i$, then minimality of $z_i$, then the lower bound at $z$:
 
-\[
-(\Theta Q)^T\Theta(AQy-\lambda Qy)=0.
-\]
+$$
+\lVert(A+\Delta A)u_i-b_i\rVert\le\lVert\hat Q\rVert\,\lVert\hat Hz_i-\hat R e_i\rVert\le\lVert\hat Q\rVert\,\lVert\hat Hz-\hat Re_i\rVert\le\frac{\lVert\hat Q\rVert}{\sigma_{\min}(\hat Q)}\,\lVert(A+\Delta A)\hat Q_{(1:p-1)}z-b_i\rVert .
+$$
 
-This is the **sketched Galerkin condition**. It enforces orthogonality after applying the sketch rather than directly in the original inner product. The reduced problem can be cheaper because the sketch has fewer rows than the original matrix.
+Since $\hat Q_{(1:p-1)}z$ ranges over all of $Q_{p-1}=\operatorname{range}(\hat Q_{(1:p-1)})=\mathcal{K}_{p-1}(A+\Delta A,B)$, this is the paper's conclusion:
 
-The paper reformulates the analysis using projection operators to bound the residual error of the randomized Rayleigh–Ritz approximation. The main intuition is that the sketch should preserve the geometry of the relevant subspaces well enough for the sketched orthogonality condition to remain informative about the original residual.
+$$
+\lVert(A+\Delta A)u_i-b_i\rVert\le\operatorname{cond}(\hat Q)\min_{v\in Q_{p-1}}\lVert(A+\Delta A)v-b_i\rVert .
+$$
 
-## 3. How the ideas fit together
+**Where the embedding enters.** The least-squares problem (4.2) minimizes a Euclidean norm in coefficient space. Because $\hat Q$ is $\Theta$-orthonormal, this is the same as minimizing the *sketched* residual $\lVert\Theta(Av-b_i)\rVert$ over the Krylov subspace (Remark 4.1, p. 15). The $\varepsilon$-embedding property makes $\hat Q$ well conditioned, via Corollary 1.4 and Theorem 3.2, so that $\operatorname{cond}(\hat Q)=O(1)$ and the factor above is of order one.
 
-- **RBGS** constructs a basis efficiently while controlling its numerical quality.
-- **Randomized Arnoldi** uses the basis construction to build block Krylov subspaces.
-- **Randomized GMRES** uses the subspace to minimize a sketched residual.
-- **Randomized Rayleigh–Ritz** uses the subspace to obtain approximate eigenpairs through sketched Galerkin orthogonality.
+**What this does and does not say.** The result is quasi-optimality, not equality with classical GMRES. Two qualifications matter. First, the comparison is made for the slightly perturbed matrix $A+\Delta A$, not for $A$ itself. Second, it relies on $\Theta$ being an $\varepsilon$-embedding for the computed Krylov space. The authors state in Sec. 7 (p. 26) that this property is observed in their experiments but is still unproven for randomized Arnoldi. The test in Sec. 5.2 (pp. 19–20) shows residual convergence comparable to BCGS2 with a well-conditioned $Q$.
 
-The common principle is to do the expensive search/projection work in a smaller sketch space, while relying on embedding and stability results to relate the result to the original problem.
+## 2. The sketched Galerkin condition in Rayleigh–Ritz (pp. 15–16)
 
-## 4. Practical interpretation
+**Classical Rayleigh–Ritz.** Given a Krylov basis $Q_{(1:p)}$ from Arnoldi, the extreme eigenpairs $(\lambda,x)$ of $A$ are approximated by $(\mu,u)=(\mu,Q_{(1:p-1)}y)$, where $(\mu,y)$ is an eigenpair of the small matrix $H_{(1:p-1,1:p-1)}$ (eq. 4.6). With an $\ell_2$-orthonormal $Q$ one has $H_{(1:p-1,1:p-1)}=Q_{(1:p-1)}^{\top}AQ_{(1:p-1)}$, which is equivalent to the Galerkin orthogonality condition (4.7),
 
-The method is attractive when the original matrices are tall or expensive to access, and when operations on a smaller sketch can reduce computation or communication. However, sketch dimension, sketch quality, basis conditioning, and floating-point precision must be chosen carefully. Small-scale NumPy timings alone do not demonstrate the parallel-hardware advantage emphasized by the paper.
+$$
+\langle v,\ r(u,\mu u)\rangle=0\quad\text{for all }v\in Q_{p-1},\qquad r(u,\mu u)=Au-\mu u .
+$$
+
+**Randomized version.** RBGS-Arnoldi produces a basis $Q$ that is orthonormal with respect to $\langle\Theta\cdot,\Theta\cdot\rangle$, so $(\Theta Q_{(1:p-1)})^{\top}\Theta Q_{(1:p-1)}=I$ and
+
+$$
+H_{(1:p-1,1:p-1)}=(\Theta Q_{(1:p-1)})^{\top}\,\Theta A\,Q_{(1:p-1)} .
+$$
+
+An eigenpair of this matrix therefore satisfies the **sketched Galerkin condition** (4.9),
+
+$$
+\langle\Theta v,\ \Theta\,r(u,\mu u)\rangle=0\quad\text{for all }v\in Q_{p-1}.
+$$
+
+This is the classical condition with the inner product and norm replaced by their sketched counterparts. Equivalently, if $\Pi_{Q_{p-1}}$ is the $\ell_2$-orthogonal projector onto $Q_{p-1}$, classical Rayleigh–Ritz finds eigenpairs of the approximate operator $\Pi_{Q_{p-1}}A\Pi_{Q_{p-1}}$. The randomized method finds eigenpairs of $\Pi^{\Theta}_{Q_{p-1}}A\,\Pi^{\Theta}_{Q_{p-1}}$, where $\Pi^{\Theta}_{Q_{p-1}}=Q_{(1:p-1)}(\Theta Q_{(1:p-1)})^{\dagger}\Theta$ is the projector that is orthogonal in the sketched inner product.
+
+**Residual estimate and accuracy.** For any pair, (4.8) gives
+$\sigma_{\min}(Q)\lVert H_{(p,1:p-1)}y\rVert\le\lVert r(\mu,u)\rVert\le\sigma_{\max}(Q)\lVert H_{(p,1:p-1)}y\rVert$.
+Since the embedding property gives $\operatorname{cond}(Q)=1+O(\varepsilon)$, the cheap quantity $\lVert H_{(p,1:p-1)}y\rVert$ is a reliable estimate of the true residual. Accuracy of the sketched Galerkin projection, however, does not follow directly from the embedding property, unlike for GMRES (p. 16). The paper handles it by rewriting everything with projection operators, as above, which is where Lemma SM.1 and Theorems SM.2–SM.3 enter (see `lemma_sm_1.md`). If the classical projection is preferred, Remark 4.2 (p. 16) shows how to get it by adding one Cholesky QR step.
+
+## 3. How the two applications fit together
+
+Both methods use the same ingredient, the $\Theta$-orthonormal Krylov basis from RBGS-Arnoldi. They differ in the condition imposed on the basis. GMRES minimizes the (sketched) residual over the subspace, and this is controlled by $\operatorname{cond}(\hat Q)$. Rayleigh–Ritz imposes a sketched orthogonality condition on the residual, and this is analysed through the sketched projector. In both cases the heavy work happens in the $k$-dimensional sketch space, and the embedding and stability results of Secs. 1.3 and 3 are what justify translating the result back to the original problem.

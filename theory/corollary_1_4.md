@@ -1,94 +1,75 @@
-# Corollary 1.4 — Singular-Value Bounds from an \(\varepsilon\)-Embedding
+# Corollary 1.4: Singular-Value Bounds from an $\varepsilon$-Embedding
 
-**Source:** Balabanov and Grigori, *Randomized Block Gram–Schmidt Process for the Solution of Linear Systems and Eigenvalue Problems*, Section 1.3, Corollary 1.4 (cited there as Corollary 2.2 of the earlier randomized Gram–Schmidt paper).
+**Source:** Balabanov and Grigori, *Randomized Block Gram–Schmidt Process for the Solution of Linear Systems and Eigenvalue Problems*, Sec. 1.3, Corollary 1.4 (p. 4). The paper only refers to [4] for the proof, so the full argument is written out below.
 
 ## Statement
 
-Let \(\Theta\) be an \(\varepsilon\)-embedding for the subspace spanned by the columns of \(V\), where \(0\leq\varepsilon<1\). The embedding approximately preserves inner products on that subspace:
+Let $V\in\mathbb{R}^{n\times m}$ and let $\Theta\in\mathbb{R}^{k\times n}$ be an $\varepsilon$-embedding for $V$ (that is, for $\operatorname{range}(V)$), with $0\le\varepsilon<1$. By Definition 1.1 this means
 
-\[
-|\langle x,y\rangle-\langle\Theta x,\Theta y\rangle|
-\leq \varepsilon\|x\|_2\|y\|_2
-\qquad \text{for all }x,y\in\operatorname{range}(V).
-\]
+$$
+\left|\langle x,y\rangle-\langle\Theta x,\Theta y\rangle\right|\le\varepsilon\,\lVert x\rVert\,\lVert y\rVert
+\qquad\text{for all } x,y\in\operatorname{range}(V).
+$$
 
-In particular, setting \(x=y\) gives
+Then the singular values of $V$ satisfy
 
-\[
-(1-\varepsilon)\|x\|_2^2
-\leq \|\Theta x\|_2^2
-\leq (1+\varepsilon)\|x\|_2^2.
-\]
+$$
+(1+\varepsilon)^{-1/2}\,\sigma_{\min}(\Theta V)\;\le\;\sigma_{\min}(V)\;\le\;\sigma_{\max}(V)\;\le\;(1-\varepsilon)^{-1/2}\,\sigma_{\max}(\Theta V).
+$$
 
-Applying this to \(x=Vz\) for every vector \(z\), and using the variational characterizations of the extreme singular values, yields
+## Proof
 
-\[
-\sqrt{1-\varepsilon}\,\sigma_{\min}(V)
-\leq \sigma_{\min}(\Theta V)
-\leq \sigma_{\max}(\Theta V)
-\leq \sqrt{1+\varepsilon}\,\sigma_{\max}(V).
-\]
+Throughout, $\sigma_{\min}(A)=\min_{\lVert z\rVert=1}\lVert Az\rVert$ and $\sigma_{\max}(A)=\max_{\lVert z\rVert=1}\lVert Az\rVert$ for a tall matrix $A$. These are the standard variational descriptions of the extreme singular values, and the whole proof rests on them.
 
-Equivalently, the corresponding individual singular values are distorted by at most the factors \(\sqrt{1-\varepsilon}\) and \(\sqrt{1+\varepsilon}\). The inequalities most useful in stability arguments are
+**Step 1: the embedding preserves norms.** Take $y=x$ in the definition. Since $\langle x,x\rangle=\lVert x\rVert^2$ and $\langle\Theta x,\Theta x\rangle=\lVert\Theta x\rVert^2$, we get $\left|\lVert x\rVert^2-\lVert\Theta x\rVert^2\right|\le\varepsilon\lVert x\rVert^2$. Rearranging gives
 
-\[
-\frac{\sigma_{\min}(\Theta V)}{\sqrt{1+\varepsilon}}
-\leq \sigma_{\min}(V),
-\qquad
-\sigma_{\max}(V)
-\leq \frac{\sigma_{\max}(\Theta V)}{\sqrt{1-\varepsilon}},
-\]
+$$
+(1-\varepsilon)\lVert x\rVert^2\le\lVert\Theta x\rVert^2\le(1+\varepsilon)\lVert x\rVert^2 .
+$$
 
-where the first and second inequalities follow from applying the embedding bounds to the relevant singular directions. (When quoting the corollary in a final report, use the exact ordering and form of the displayed inequalities in the original PDF.)
+All terms are nonnegative because $\varepsilon<1$, so taking square roots is allowed.
 
-## Complete proof
+**Step 2: pass to the matrix $V$.** For any $z\in\mathbb{R}^m$ the vector $Vz$ lies in $\operatorname{range}(V)$, so Step 1 applies to $x=Vz$:
 
-Let \(z\) be any vector of compatible dimension and put \(x=Vz\). Since \(x\) lies in \(\operatorname{range}(V)\), the embedding condition with \(y=x\) gives
+$$
+\sqrt{1-\varepsilon}\,\lVert Vz\rVert\;\le\;\lVert\Theta Vz\rVert\;\le\;\sqrt{1+\varepsilon}\,\lVert Vz\rVert
+\qquad\text{for every } z\in\mathbb{R}^m. \tag{1}
+$$
 
-\[
-\left|\|Vz\|_2^2-\|\Theta Vz\|_2^2\right|
-\leq \varepsilon\|Vz\|_2^2.
-\]
+This is the only place where the embedding hypothesis enters.
 
-Rearranging the two sides,
+**Step 3: the lower bound on $\sigma_{\min}(V)$.** Choose a unit vector $z_\ast$ at which $V$ is shortest, so that $\lVert Vz_\ast\rVert=\sigma_{\min}(V)$. Since $\sigma_{\min}(\Theta V)$ is the smallest value of $\lVert\Theta Vz\rVert$ over unit vectors, it cannot exceed the value at this particular $z_\ast$. Using the right-hand inequality of (1),
 
-\[
-(1-\varepsilon)\|Vz\|_2^2
-\leq \|\Theta Vz\|_2^2
-\leq (1+\varepsilon)\|Vz\|_2^2.
-\]
+$$
+\sigma_{\min}(\Theta V)\le\lVert\Theta Vz_\ast\rVert\le\sqrt{1+\varepsilon}\,\lVert Vz_\ast\rVert=\sqrt{1+\varepsilon}\;\sigma_{\min}(V).
+$$
 
-Taking square roots (all terms are nonnegative),
+Dividing by $\sqrt{1+\varepsilon}$ gives $(1+\varepsilon)^{-1/2}\sigma_{\min}(\Theta V)\le\sigma_{\min}(V)$.
 
-\[
-\sqrt{1-\varepsilon}\|Vz\|_2
-\leq \|\Theta Vz\|_2
-\leq \sqrt{1+\varepsilon}\|Vz\|_2.
-\tag{1}
-\]
+**Step 4: the upper bound on $\sigma_{\max}(V)$.** Now choose a unit vector $z^\ast$ at which $V$ is longest, so that $\lVert Vz^\ast\rVert=\sigma_{\max}(V)$. Since $\sigma_{\max}(\Theta V)$ is the largest value of $\lVert\Theta Vz\rVert$ over unit vectors, it is at least the value at $z^\ast$. Using the left-hand inequality of (1),
 
-For any matrix \(A\), its largest singular value satisfies
-\(\sigma_{\max}(A)=\max_{\|z\|_2=1}\|Az\|_2\), and its smallest singular value (for a matrix with full column rank) satisfies
-\(\sigma_{\min}(A)=\min_{\|z\|_2=1}\|Az\|_2\).
+$$
+\sigma_{\max}(\Theta V)\ge\lVert\Theta Vz^\ast\rVert\ge\sqrt{1-\varepsilon}\,\lVert Vz^\ast\rVert=\sqrt{1-\varepsilon}\;\sigma_{\max}(V).
+$$
 
-Taking the maximum over unit \(z\) in the upper bound of (1) gives
-\[
-\sigma_{\max}(\Theta V)\leq
-\sqrt{1+\varepsilon}\,\sigma_{\max}(V).
-\]
+Dividing by $\sqrt{1-\varepsilon}>0$ gives $\sigma_{\max}(V)\le(1-\varepsilon)^{-1/2}\sigma_{\max}(\Theta V)$.
 
-Taking the minimum over unit \(z\) in the lower bound of (1) gives
-\[
-\sigma_{\min}(\Theta V)\geq
-\sqrt{1-\varepsilon}\,\sigma_{\min}(V).
-\]
+**Step 5: the middle inequality.** $\sigma_{\min}(V)\le\sigma_{\max}(V)$ holds for every matrix. Combining Steps 3 and 4 with this gives the claimed chain. $\qquad\blacksquare$
 
-These are the required extreme-singular-value estimates. The embedding also prevents a nonzero vector in \(\operatorname{range}(V)\) from being mapped to zero when \(\varepsilon<1\), so the sketch preserves the rank of \(V\). This completes the proof. \(\square\)
+## Remarks
 
-## Why it matters for RBGS
+1. **Why the proof uses the "other" direction of (1).** Taking the minimum of the left side of (1) over unit $z$ gives the different inequality $\sigma_{\min}(\Theta V)\ge\sqrt{1-\varepsilon}\,\sigma_{\min}(V)$, and similarly $\sigma_{\max}(\Theta V)\le\sqrt{1+\varepsilon}\,\sigma_{\max}(V)$. Both are true, but they bound the sketch in terms of $V$. The corollary needs the reverse, because $\Theta V$ is the small matrix we can compute and the aim is to bound $V$ itself. This is why the proof evaluates (1) at the specific vectors $z_\ast$ and $z^\ast$ rather than optimizing over $z$.
 
-The algorithm monitors quantities involving the small matrix \(\Theta Q\). Corollary 1.4 is the bridge between the geometry measured in sketch space and the geometry of the original basis \(Q\). If the embedding is accurate, singular-value information about the sketched basis can be translated into bounds for the original basis, which is a key ingredient in the stability analysis.
+2. **Rank is preserved.** Since $\varepsilon<1$, (1) shows that $\Theta Vz=0$ only if $Vz=0$.
 
-## Verification note
+3. **Consequence for the condition number.** Combining the two outer inequalities,
+$$
+\operatorname{cond}(V)\le\sqrt{\frac{1+\varepsilon}{1-\varepsilon}}\;\operatorname{cond}(\Theta V).
+$$
+If $\Theta V$ is nearly orthonormal, then $\operatorname{cond}(V)=1+O(\varepsilon)$. This is the fact quoted in Sec. 4.4 (p. 16) to justify that $\lVert H_{(p,1:p-1)}y\rVert$ is a reliable residual estimate in randomized Rayleigh–Ritz.
 
-The argument above proves the standard singular-value consequence of the \(\varepsilon\)-embedding definition. Before submission, compare the exact displayed statement in Corollary 1.4 with the paper's PDF and make the notation/inequality ordering match it verbatim; PDF text extraction may omit displayed equations.
+## Where the corollary is used
+
+In the proof of Theorem 3.2 (p. 21), the algorithm controls the singular values of the small sketch $\hat S\approx\Theta\hat Q$ through the quantity $\Delta^{(p)}=\lVert I-\hat S^{\top}\hat S\rVert_F$. Corollary 1.4, applied with $V=\hat Q$, converts these into the bounds
+$(1+\varepsilon)^{-1/2}(1-\Delta^{(p)}-F_1)\le\sigma_{\min}(\hat Q)\le\sigma_{\max}(\hat Q)\le(1-\varepsilon)^{-1/2}(1+\Delta^{(p)}+F_1)$
+for the computed basis $\hat Q$ itself. The same step is repeated for $\hat W\hat R^{-1}$ in the proof of Proposition 3.5 (p. 25).
