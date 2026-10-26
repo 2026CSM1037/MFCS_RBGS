@@ -14,7 +14,8 @@ from scipy import sparse
 from scipy.sparse.csgraph import reverse_cuthill_mckee
 from scipy.sparse.linalg import LinearOperator, aslinearoperator, spilu
 
-from src.baselines import (_bcgs2_project, _bcgs_project, _bmgs_project, _householder_qr)
+from src.baselines import (_bcgs2_project, _bcgs_project, _bmgs_project,
+                           _householder_qr)
 from src.metrics import cond_Q, eig_residuals, relative_residual
 from src.rbgs import RBGSProcess
 
@@ -260,11 +261,13 @@ def subspace_iteration(A, B, n_iter, which="LM", frac=0.8):
 
 
 # ---------------------------------------------------------- preconditioner
-def ilu_preconditioner(A, drop_tol=0.0, fill_factor=1.0, rcm=True):
+def ilu_preconditioner(A, drop_tol=1e-4, fill_factor=10.0, rcm=True):
     """M ~ A^{-1} from an incomplete LU of A after reverse Cuthill-McKee ordering.
 
-    The defaults (no dropping, no extra fill) approximate the paper's ILU(0);
-    SciPy's spilu is threshold-based, so it is not an exact ILU(0).
+    The paper uses ILU(0), which SciPy does not provide. This is threshold ILU
+    (SciPy spilu / SuperLU ILUTP): entries below drop_tol are dropped and
+    fill is capped at fill_factor * nnz(A). Note: a small fill_factor such as 1
+    drops entries even inside the pattern of A, so it is weaker than ILU(0).
     Use it as gmres(A, B, M=ilu_preconditioner(A)).
     """
     A = sparse.csr_matrix(A)
