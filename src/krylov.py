@@ -203,14 +203,13 @@ def _normalize(U):
 
 
 def rr(A, B, p, n_cycles, method="rbgs", sketch=None, which="LM", frac=0.8,
-       dtype=np.float64, track=True, track_cond=False, **rbgs_kwargs):
+       dtype=np.float64, track=True, **rbgs_kwargs):
     """Restarted randomized Rayleigh-Ritz (Algorithm 4.2).
 
     Each cycle runs block Arnoldi with p blocks (p-1 iterations) from B and
     restarts with the mp extreme Ritz vectors. With track=True the error
     max_{j <= frac*mp} ||A u_j - mu_j u_j|| / ||mu_j u_j|| is recorded after
-    every iteration (Figure 3a), otherwise once per cycle. With track_cond=True,
-    info["cond_Q"] holds cond of the Krylov basis at the same points (Figure 3b).
+    every iteration (Figure 3a), otherwise once per cycle.
 
     Returns the Ritz values mu (most extreme first), unit-norm Ritz vectors U
     and info (with "residual_estimate" = ||H_{p,1:p-1} y|| of step 3).
@@ -218,7 +217,7 @@ def rr(A, B, p, n_cycles, method="rbgs", sketch=None, which="LM", frac=0.8,
     Aop = aslinearoperator(A)
     B = np.asarray(B, dtype=np.float64)
     n, mp = B.shape
-    history, conds = [], []
+    history = []
     for _ in range(n_cycles):
         proc = _new_process(method, n, p * mp, mp, sketch, dtype, rbgs_kwargs)
         proc.step(B)
@@ -232,8 +231,6 @@ def rr(A, B, p, n_cycles, method="rbgs", sketch=None, which="LM", frac=0.8,
             Qj = np.asarray(proc.Q[:, :j * mp], dtype=np.float64)
             U = Qj @ Yv
             history.append(_eig_error(Aop, U, mu, frac))
-            if track_cond:
-                conds.append(cond_Q(proc.Q[:, :c]))
         estimate = np.linalg.norm(H[j * mp:] @ Yv, axis=0)
         B = Qj @ _real_basis(mu, Yv, mp)
 
@@ -242,7 +239,6 @@ def rr(A, B, p, n_cycles, method="rbgs", sketch=None, which="LM", frac=0.8,
         "errors": np.array(history),
         "iterations": n_cycles * (p - 1),
         "residual_estimate": estimate,
-        "cond_Q": np.array(conds) if track_cond else None,
     }
     return np.real_if_close(mu), np.real_if_close(_normalize(U)), info
 
