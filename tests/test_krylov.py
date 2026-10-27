@@ -152,10 +152,11 @@ def test_rr_finds_known_complex_eigenvalues():
 def test_rr_errors_recorded_per_iteration():
     A = _known_spectrum([10.0, 9.0, 8.0, 7.0, 6.0])
     B = np.random.default_rng(0).standard_normal((400, 5))
-    _, _, every = rr(A, B, p=6, n_cycles=2, sketch=_sketch(400, 200))
+    _, _, every = rr(A, B, p=6, n_cycles=2, sketch=_sketch(400, 200), track_cond=True)
     _, _, ends = rr(A, B, p=6, n_cycles=2, sketch=_sketch(400, 200), track=False)
-    assert len(every["errors"]) == every["iterations"] == 10
-    assert len(ends["errors"]) == 2
+    assert len(every["errors"]) == every["iterations"] == len(every["cond_Q"]) == 10
+    assert np.all(every["cond_Q"] < 10)
+    assert len(ends["errors"]) == 2 and ends["cond_Q"] is None
 
 
 def test_subspace_iteration_finds_known_eigenvalues():
